@@ -1,0 +1,109 @@
+CMPL model generation - running
+
+CMPL version: 1.11.0
+Authors: Thomas Schleiff, Mike Steglich
+Distributed under the GPLv3 
+
+create model instance ...
+write model instance ...
+CMPL model generation - finished
+
+Solver - running
+
+
+Welcome to IBM(R) ILOG(R) CPLEX(R) Interactive Optimizer 12.7.1.0
+  with Simplex, Mixed Integer & Barrier Optimizers
+5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 5655-Y21
+Copyright IBM Corp. 1988, 2017.  All Rights Reserved.
+
+Type 'help' for a list of available commands.
+Type 'help' followed by a command name for more
+information on commands.
+
+CPLEX> Specified objective sense: MINIMIZE
+Selected objective  name:  line[1]
+Selected RHS        name:  RHS
+Selected bound      name:  BOUND
+Problem '/tmp/cmpl.T27394.mps' read.
+Read time = 0.10 sec. (16.18 ticks)
+CPLEX> New value for mixed integer optimality gap tolerance: 0.007
+CPLEX> CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
+CPXPARAM_MIP_Tolerances_MIPGap                   0.0070000000000000001
+Tried aggregator 3 times.
+MIP Presolve eliminated 65078 rows and 42630 columns.
+MIP Presolve modified 6616 coefficients.
+Aggregator did 1411 substitutions.
+Reduced MIP has 5676 rows, 4152 columns, and 17507 nonzeros.
+Reduced MIP has 2828 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.10 sec. (84.01 ticks)
+Found incumbent of value 3806.911922 after 0.13 sec. (98.65 ticks)
+Probing fixed 0 vars, tightened 475 bounds.
+Probing time = 0.03 sec. (13.23 ticks)
+Tried aggregator 1 time.
+MIP Presolve modified 1229 coefficients.
+Reduced MIP has 5676 rows, 4152 columns, and 17507 nonzeros.
+Reduced MIP has 2996 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (13.44 ticks)
+Probing time = 0.01 sec. (2.76 ticks)
+Clique table members: 2378.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.18 sec. (143.81 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                         3806.9119     -353.9458           109.30%
+      0     0     1729.1692   378     3806.9119     1729.1692     4379   54.58%
+*     0+    0                         1756.5476     1729.1692             1.56%
+      0     0     1730.3214   355     1756.5476     Cuts: 278     4912    1.49%
+*     0+    0                         1755.0358     1730.3214             1.41%
+      0     0     1731.3385   357     1755.0358     Cuts: 385     5838    1.35%
+*     0+    0                         1753.2568     1731.3385             1.25%
+      0     0     1732.2240   352     1753.2568     Cuts: 346     6755    1.20%
+*     0+    0                         1751.6329     1732.2240             1.11%
+*     0+    0                         1751.4335     1732.2240             1.10%
+      0     0     1733.1401   349     1751.4335     Cuts: 358     7431    1.04%
+*     0+    0                         1750.5896     1733.1401             1.00%
+      0     0     1733.7813   347     1750.5896     Cuts: 333     8048    0.96%
+*     0+    0                         1749.0898     1733.7813             0.88%
+      0     0     1734.2460   349     1749.0898     Cuts: 309     8587    0.85%
+*     0+    0                         1748.9281     1734.2460             0.84%
+*     0+    0                         1748.4372     1734.2460             0.81%
+      0     0     1734.5603   349     1748.4372     Cuts: 245     9053    0.79%
+      0     0     1734.9225   351     1748.4372     Cuts: 264     9582    0.77%
+      0     0     1735.1087   349     1748.4372     Cuts: 212     9935    0.76%
+      0     0     1735.2741   345     1748.4372     Cuts: 177    10305    0.75%
+      0     0     1735.4381   355     1748.4372     Cuts: 161    10610    0.74%
+*     0+    0                         1746.8829     1735.4381             0.66%
+
+Flow cuts applied:  514
+Mixed integer rounding cuts applied:  532
+Zero-half cuts applied:  2
+Lift and project cuts applied:  1
+Gomory fractional cuts applied:  6
+
+Root node processing (before b&c):
+  Real time             =    2.54 sec. (1925.44 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    2.54 sec. (1925.44 ticks)
+
+Solution pool: 11 solutions saved.
+
+MIP - Integer optimal, tolerance (0.007/1e-06):  Objective =  1.7468828570e+03
+Current MIP best bound =  1.7354381191e+03 (gap = 11.4447, 0.66%)
+Solution time =    2.54 sec.  Iterations = 10610  Nodes = 0 (1)
+Deterministic time = 1925.57 ticks  (759.21 ticks/sec)
+
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T27394.gsol'.
+CPLEX> 
+CMPL: Time used for model generation: 10 seconds
+CMPL: Time used for solving the model: 4 seconds
+
+
+Solution written to ASCII file: /media/sf_ltf/results/output_generated/2017-06-05-4/fair-nonlinear.sol
+
+Solver - finished
