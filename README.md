@@ -3,6 +3,15 @@ Long-term fairness for preference fulfillment of hospital physicians
 
 This is an implementation to assist with experiments presented in the paper "An indicator for long-term fairness in preference fulfillment on duty schedules for physicians in hospitals".
 
+Directory structure
+-------------------
+
+This repository is structured as follows.
+
+* ``data`` contains the data used for the experiments in the paper. For privacy reasons, we do not provide real-life data but only generated data.
+* ``results`` contains the results obtained by experiments in the paper. ``results/output_generated`` and ``results/results_generated.xlsx`` contain results for the generated data. For privacy reasons, we do not provide detailed results for real-life data, instead we just provide aggregated real-life results in ``results/results_real.xlsx``.
+* ``src`` contains all the scripts required to run the experiments described in the paper. See below for a step-by-step description how to run them.
+
 Requirements
 ------------
 
