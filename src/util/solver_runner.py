@@ -58,6 +58,8 @@ class SolverRunner:
                 self.pre_solve(working_directory, fulloutdir)
                 outfilename = fileoutprefix + ".out.log"
                 errorfilename = fileoutprefix + ".err.log"
+                cdatfilename = fileoutprefix + ".cdat"
+                copyfile(data_file, cdatfilename)
                 with open(outfilename, "w") as outfile, open(errorfilename, "w") as errfile:
                     subprocess.check_call(
                         [
@@ -129,7 +131,7 @@ class UnfairSolverRunner(SolverRunner):
 
 
 class FairSolverRunner(SolverRunner):
-    alpha = 0.8
+    gamma = 0.8
 
     def __init__(self, solver: str):
         super().__init__(solver)
@@ -158,7 +160,7 @@ class FairSolverRunner(SolverRunner):
             delta_req_off = solution.count_if_exists("delta_req_off", (phys, None, None))
             d = self.parameters.get_scalar("W_max") * 7
             new_sat = (req_on - delta_req_on + req_off - delta_req_off) / d
-            smoothed_sat = self.alpha * new_sat + (1 - self.alpha) * self.parameters.get("s_hat", (phys,))
+            smoothed_sat = self.gamma * new_sat + (1 - self.gamma) * self.parameters.get("s_hat", (phys,))
             self.s_hat[phys] = smoothed_sat
 
     def write_s_hat(self, directory: str):
@@ -177,3 +179,23 @@ class FairNonLinearSolverRunner(FairSolverRunner):
                     phys = line.split("[")[1].split("]")[0]
                     value = line.split()[2]
                     self.s_hat[phys] = value
+
+    def pre_solve(self, directory: str, outdir: str):
+        super().pre_solve(directory, outdir)
+
+        c = dict()
+
+        for phys in self.parameters.get_set("J"):
+            total_requests = self.parameters.count_if_exists("g_req_on", (phys, None, None, None)) \
+                             + self.parameters.count_if_exists("g_req_off", (phys, None, None, None))
+
+            for violations in range(total_requests + 1):
+                req_on = self.parameters.count_if_exists("g_req_on", (phys, None, None, None))
+                req_off = self.parameters.count_if_exists("g_req_off", (phys, None, None))
+
+                current_sat = (req_on + req_off - violations) / \
+                              (len(self.parameters.get_set("W")) * len(self.parameters.get_set("D")))
+                vio_sat = self.gamma * current_sat + (1 - self.gamma) * self.parameters.get("s_hat", (phys,))
+                c[(phys, violations)] = violations * (2 - vio_sat)
+
+        self.replace_param_in_cdat("c", c, directory)

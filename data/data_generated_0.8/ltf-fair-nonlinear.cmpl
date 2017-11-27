@@ -1,9 +1,7 @@
 %display nonZeros
 %display con none
 
-%opt cplex mip/tolerances/mipgap 0.007
-
-%data transformed.cdat : J set, I set, W set, D set, d_bar_duty[I, D], g_req_on[J, I, W, D], g_req_off[J, W, D], E_pos[J, I, W, D], D_off[J, W, D], W_max, s_hat[J]
+%data transformed.cdat : J set, I set, W set, D set, d_bar_duty[I, D], g_req_on[J, I, W, D], g_req_off[J, W, D], E_pos[J, I, W, D], D_off[J, W, D], W_max, s_hat[J], V set, c[J, V]
 
 parameters:
 	alpha_1 := 10;
@@ -18,10 +16,11 @@ variables:
 	delta_req_on[J, I, W, D] : binary;
 	delta_req_off[J, W, D] : binary;
 	s[J] : real[0..1];
+	y[J, V] : binary;
 	
 objectives:
 	sum{i in I, w in W, d in D : alpha_1 * delta_out_duty[i, w, d]} +
-	sum{j in J, i in I, w in W, d in D : alpha_2 * 2 * delta_req_on[j, i, w, d] - alpha_2 * s[j] * delta_req_on[j, i, w, d]} + sum{j in J, w in W, d in D : alpha_2 * 2 * delta_req_off[j, w, d] - alpha_2 * s[j] * delta_req_off[j, w, d]} -> min;
+	sum{j in J, v in V : c[j, v] * y[j, v]} -> min;
 
 constraints:
 	{
@@ -87,5 +86,15 @@ constraints:
 	
 	{
 		j in J:
-			CT11c: s[j] =sum{i in I, w in W, d in D : gamma * (1 / w_times_d) * g_req_on[j, i, w, d] - gamma * (1 / w_times_d) * delta_req_on[j, i, w, d]} + sum{w in W, d in D : gamma * (1 / w_times_d) * g_req_off[j, w, d] + gamma * (1 / w_times_d) * delta_req_off[j, w, d]} + (1 - gamma) * s_hat[j];
+			CT11c: s[j] = sum{i in I, w in W, d in D : gamma * (1 / w_times_d) * g_req_on[j, i, w, d] - gamma * (1 / w_times_d) * delta_req_on[j, i, w, d]} + sum{w in W, d in D : gamma * (1 / w_times_d) * g_req_off[j, w, d] + gamma * (1 / w_times_d) * delta_req_off[j, w, d]} + (1 - gamma) * s_hat[j];
+	}
+	
+	{
+		j in J:
+			Linearize1: sum{v in V : y[j, v]} = 1;
+	}
+	
+	{
+		j in J:
+			Linearize2: sum{i in I, w in W, d in D : delta_req_on[j, i, w, d]} + sum{w in W, d in D : delta_req_off[j, w, d]} = sum{v in V : v * y[j, v]};
 	}
