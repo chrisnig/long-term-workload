@@ -24,8 +24,8 @@ CPLEX> Specified objective sense: MINIMIZE
 Selected objective  name:  line[1]
 Selected RHS        name:  RHS
 Selected bound      name:  BOUND
-Problem '/tmp/cmpl.T27272.mps' read.
-Read time = 0.06 sec. (8.13 ticks)
+Problem '/tmp/cmpl.T15107.mps' read.
+Read time = 0.05 sec. (8.13 ticks)
 CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
 Found incumbent of value 3450.000000 after 0.00 sec. (2.29 ticks)
 Tried aggregator 3 times.
@@ -55,24 +55,24 @@ Root relaxation solution time = 0.00 sec. (3.40 ticks)
 Elapsed time = 0.09 sec. (73.55 ticks, tree = 0.00 MB, solutions = 2)
 
 Root node processing (before b&c):
-  Real time             =    0.10 sec. (75.19 ticks)
+  Real time             =    0.09 sec. (75.19 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.10 sec. (75.19 ticks)
+Total (root+branch&cut) =    0.09 sec. (75.19 ticks)
 
 Solution pool: 3 solutions saved.
 
 MIP - Integer optimal solution:  Objective =  1.1400000000e+03
-Solution time =    0.10 sec.  Iterations = 16  Nodes = 0
-Deterministic time = 75.30 ticks  (769.48 ticks/sec)
+Solution time =    0.09 sec.  Iterations = 16  Nodes = 0
+Deterministic time = 75.30 ticks  (846.55 ticks/sec)
 
-CPLEX> Incumbent solution written to file '/tmp/cmpl.T27272.gsol'.
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T15107.gsol'.
 CPLEX> 
-CMPL: Time used for model generation: 0 seconds
+CMPL: Time used for model generation: 1 seconds
 CMPL: Time used for solving the model: 1 seconds
 
 
-Solution written to ASCII file: /media/sf_ltf/results/output_generated/2015-11-02-5/fair-linear.sol
+Solution written to ASCII file: results/output_generated/2015-11-02-5/fair-linear.sol
 
 Solver - finished

@@ -24,17 +24,17 @@ CPLEX> Specified objective sense: MINIMIZE
 Selected objective  name:  line[1]
 Selected RHS        name:  RHS
 Selected bound      name:  BOUND
-Problem '/tmp/cmpl.T27312.mps' read.
-Read time = 0.05 sec. (8.41 ticks)
+Problem '/tmp/cmpl.T15149.mps' read.
+Read time = 0.07 sec. (8.41 ticks)
 CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
-Found incumbent of value 4682.309287 after 0.00 sec. (2.28 ticks)
+Found incumbent of value 4682.309287 after 0.01 sec. (2.28 ticks)
 Tried aggregator 3 times.
 MIP Presolve eliminated 22889 rows and 33802 columns.
 MIP Presolve modified 425 coefficients.
 Aggregator did 1763 substitutions.
 Reduced MIP has 3015 rows, 3745 columns, and 11219 nonzeros.
 Reduced MIP has 3535 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.05 sec. (46.15 ticks)
+Presolve time = 0.06 sec. (46.15 ticks)
 Probing time = 0.01 sec. (2.85 ticks)
 Tried aggregator 1 time.
 Reduced MIP has 3015 rows, 3745 columns, and 11219 nonzeros.
@@ -66,14 +66,14 @@ Solution pool: 3 solutions saved.
 MIP - Integer optimal, tolerance (0.0001/1e-06):  Objective =  2.1650472010e+03
 Current MIP best bound =  2.1650422060e+03 (gap = 0.004995, 0.00%)
 Solution time =    0.10 sec.  Iterations = 43  Nodes = 0 (1)
-Deterministic time = 79.48 ticks  (771.32 ticks/sec)
+Deterministic time = 79.48 ticks  (757.49 ticks/sec)
 
-CPLEX> Incumbent solution written to file '/tmp/cmpl.T27312.gsol'.
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T15149.gsol'.
 CPLEX> 
 CMPL: Time used for model generation: 0 seconds
 CMPL: Time used for solving the model: 1 seconds
 
 
-Solution written to ASCII file: /media/sf_ltf/results/output_generated/2017-07-03-5/fair-linear.sol
+Solution written to ASCII file: results/output_generated/2017-07-03-5/fair-linear.sol
 
 Solver - finished

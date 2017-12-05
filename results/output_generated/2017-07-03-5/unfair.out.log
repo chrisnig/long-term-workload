@@ -24,7 +24,7 @@ CPLEX> Specified objective sense: MINIMIZE
 Selected objective  name:  line[1]
 Selected RHS        name:  RHS
 Selected bound      name:  BOUND
-Problem '/tmp/cmpl.T27264.mps' read.
+Problem '/tmp/cmpl.T15099.mps' read.
 Read time = 0.05 sec. (8.13 ticks)
 CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
 Found incumbent of value 3438.000000 after 0.00 sec. (2.28 ticks)
@@ -65,14 +65,14 @@ Solution pool: 3 solutions saved.
 
 MIP - Integer optimal solution:  Objective =  1.1290000000e+03
 Solution time =    0.09 sec.  Iterations = 20  Nodes = 0
-Deterministic time = 75.32 ticks  (816.40 ticks/sec)
+Deterministic time = 75.32 ticks  (814.46 ticks/sec)
 
-CPLEX> Incumbent solution written to file '/tmp/cmpl.T27264.gsol'.
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T15099.gsol'.
 CPLEX> 
 CMPL: Time used for model generation: 1 seconds
 CMPL: Time used for solving the model: 1 seconds
 
 
-Solution written to ASCII file: /media/sf_ltf/results/output_generated/2017-07-03-5/unfair.sol
+Solution written to ASCII file: results/output_generated/2017-07-03-5/unfair.sol
 
 Solver - finished

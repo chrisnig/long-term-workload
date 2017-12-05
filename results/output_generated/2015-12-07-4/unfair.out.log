@@ -24,8 +24,8 @@ CPLEX> Specified objective sense: MINIMIZE
 Selected objective  name:  line[1]
 Selected RHS        name:  RHS
 Selected bound      name:  BOUND
-Problem '/tmp/cmpl.T27224.mps' read.
-Read time = 0.04 sec. (6.49 ticks)
+Problem '/tmp/cmpl.T14449.mps' read.
+Read time = 0.07 sec. (6.49 ticks)
 CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
 Found incumbent of value 2761.000000 after 0.00 sec. (1.83 ticks)
 Tried aggregator 3 times.
@@ -34,8 +34,8 @@ MIP Presolve modified 340 coefficients.
 Aggregator did 1421 substitutions.
 Reduced MIP has 2378 rows, 2996 columns, and 8854 nonzeros.
 Reduced MIP has 2828 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.04 sec. (36.85 ticks)
-Probing time = 0.00 sec. (2.70 ticks)
+Presolve time = 0.08 sec. (36.85 ticks)
+Probing time = 0.01 sec. (2.70 ticks)
 Tried aggregator 1 time.
 Reduced MIP has 2378 rows, 2996 columns, and 8854 nonzeros.
 Reduced MIP has 2996 binaries, 0 generals, 0 SOSs, and 0 indicators.
@@ -45,34 +45,34 @@ Clique table members: 2378.
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
 Parallel mode: none, using 1 thread.
-Root relaxation solution time = 0.00 sec. (2.71 ticks)
+Root relaxation solution time = 0.01 sec. (2.71 ticks)
 
         Nodes                                         Cuts/
    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
 
 *     0+    0                         2761.0000        0.0000           100.00%
 *     0     0      integral     0      913.0000      913.0000       15    0.00%
-Elapsed time = 0.08 sec. (59.53 ticks, tree = 0.00 MB, solutions = 2)
+Elapsed time = 0.15 sec. (59.53 ticks, tree = 0.00 MB, solutions = 2)
 
 Root node processing (before b&c):
-  Real time             =    0.08 sec. (60.85 ticks)
+  Real time             =    0.15 sec. (60.85 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.08 sec. (60.85 ticks)
+Total (root+branch&cut) =    0.15 sec. (60.85 ticks)
 
 Solution pool: 3 solutions saved.
 
 MIP - Integer optimal solution:  Objective =  9.1300000000e+02
-Solution time =    0.08 sec.  Iterations = 15  Nodes = 0
-Deterministic time = 60.94 ticks  (739.70 ticks/sec)
+Solution time =    0.15 sec.  Iterations = 15  Nodes = 0
+Deterministic time = 60.94 ticks  (403.02 ticks/sec)
 
-CPLEX> Incumbent solution written to file '/tmp/cmpl.T27224.gsol'.
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T14449.gsol'.
 CPLEX> 
 CMPL: Time used for model generation: 1 seconds
 CMPL: Time used for solving the model: 1 seconds
 
 
-Solution written to ASCII file: /media/sf_ltf/results/output_generated/2015-12-07-4/unfair.sol
+Solution written to ASCII file: results/output_generated/2015-12-07-4/unfair.sol
 
 Solver - finished

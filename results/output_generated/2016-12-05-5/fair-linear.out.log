@@ -24,8 +24,8 @@ CPLEX> Specified objective sense: MINIMIZE
 Selected objective  name:  line[1]
 Selected RHS        name:  RHS
 Selected bound      name:  BOUND
-Problem '/tmp/cmpl.T27298.mps' read.
-Read time = 0.05 sec. (8.41 ticks)
+Problem '/tmp/cmpl.T15133.mps' read.
+Read time = 0.04 sec. (8.41 ticks)
 CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
 Found incumbent of value 4663.580753 after 0.00 sec. (2.28 ticks)
 Tried aggregator 3 times.
@@ -34,7 +34,7 @@ MIP Presolve modified 425 coefficients.
 Aggregator did 1753 substitutions.
 Reduced MIP has 3015 rows, 3745 columns, and 11219 nonzeros.
 Reduced MIP has 3535 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.07 sec. (46.14 ticks)
+Presolve time = 0.05 sec. (46.14 ticks)
 Probing time = 0.01 sec. (2.85 ticks)
 Tried aggregator 1 time.
 Reduced MIP has 3015 rows, 3745 columns, and 11219 nonzeros.
@@ -52,27 +52,27 @@ Root relaxation solution time = 0.00 sec. (3.54 ticks)
 
 *     0+    0                         4663.5808        0.0000           100.00%
 *     0     0      integral     0     2148.5995     2148.5995       41    0.00%
-Elapsed time = 0.11 sec. (73.41 ticks, tree = 0.00 MB, solutions = 2)
+Elapsed time = 0.09 sec. (73.41 ticks, tree = 0.00 MB, solutions = 2)
 
 Root node processing (before b&c):
-  Real time             =    0.11 sec. (75.05 ticks)
+  Real time             =    0.09 sec. (75.05 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.11 sec. (75.05 ticks)
+Total (root+branch&cut) =    0.09 sec. (75.05 ticks)
 
 Solution pool: 3 solutions saved.
 
 MIP - Integer optimal solution:  Objective =  2.1485995120e+03
-Solution time =    0.11 sec.  Iterations = 41  Nodes = 0
-Deterministic time = 75.17 ticks  (655.18 ticks/sec)
+Solution time =    0.09 sec.  Iterations = 41  Nodes = 0
+Deterministic time = 75.17 ticks  (837.94 ticks/sec)
 
-CPLEX> Incumbent solution written to file '/tmp/cmpl.T27298.gsol'.
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T15133.gsol'.
 CPLEX> 
-CMPL: Time used for model generation: 0 seconds
-CMPL: Time used for solving the model: 1 seconds
+CMPL: Time used for model generation: 1 seconds
+CMPL: Time used for solving the model: 0 seconds
 
 
-Solution written to ASCII file: /media/sf_ltf/results/output_generated/2016-12-05-5/fair-linear.sol
+Solution written to ASCII file: results/output_generated/2016-12-05-5/fair-linear.sol
 
 Solver - finished
