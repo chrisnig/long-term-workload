@@ -185,16 +185,17 @@ class FairNonLinearSolverRunner(FairSolverRunner):
 
         c = dict()
 
+        weeks = len(self.parameters.get_set("W"))
+        days = len(self.parameters.get_set("D"))
+
         for phys in self.parameters.get_set("J"):
-            total_requests = self.parameters.count_if_exists("g_req_on", (phys, None, None, None)) \
-                             + self.parameters.count_if_exists("g_req_off", (phys, None, None, None))
+            req_on = self.parameters.count_if_exists("g_req_on", (phys, None, None, None))
+            req_off = self.parameters.count_if_exists("g_req_off", (phys, None, None))
+
+            total_requests = req_on + req_off
 
             for violations in range(total_requests + 1):
-                req_on = self.parameters.count_if_exists("g_req_on", (phys, None, None, None))
-                req_off = self.parameters.count_if_exists("g_req_off", (phys, None, None))
-
-                current_sat = (req_on + req_off - violations) / \
-                              (len(self.parameters.get_set("W")) * len(self.parameters.get_set("D")))
+                current_sat = (total_requests - violations) / (weeks * days)
                 vio_sat = self.gamma * current_sat + (1 - self.gamma) * self.parameters.get("s_hat", (phys,))
                 c[(phys, violations)] = violations * (2 - vio_sat)
 
