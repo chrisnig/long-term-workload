@@ -28,6 +28,6 @@ for directory in filter(lambda x: os.path.isdir(x),
 
 print("total preferences: {:18}".format(total_pref))
 print("conflicting preferences: {:12}".format(conflict_pref))
-print("conflict percentage: {:15.2f}%".format((conflict_pref / total_pref) * 100))
 print("preference rate: {:19.2f}%".format((total_pref / total_days) * 100))
+print("conflict percentage: {:15.2f}%".format((conflict_pref / total_pref) * 100))
 print("total days: {:25}".format(total_days))

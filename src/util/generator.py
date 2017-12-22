@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import random
 from util.days_helper import DaysHelper
@@ -11,9 +12,10 @@ class DataGenerator:
 
 
 class RequestGenerator(DataGenerator):
-    def __init__(self, on_probability: float, off_probability: float) -> None:
+    def __init__(self, on_probability: float, off_probability: float, conflict_probability: float =None) -> None:
         self.request_on_probability = on_probability
         self.request_off_probability = off_probability
+        self.request_conflict_probability = conflict_probability
 
     def generate(self, data: util.data.DataSet) -> None:
         self.clear_request_vars(data)
@@ -34,6 +36,117 @@ class RequestGenerator(DataGenerator):
                             data.set("g_req_on", (phys, duty, week, day), 1)
                     elif rand < self.request_off_probability + self.request_on_probability:
                         data.set("g_req_off", (phys, week, day), 1)
+
+        if self.request_conflict_probability is not None:
+            conflicts_cnt = 0
+            conflicts = defaultdict(lambda: set())
+            total_requests = 0
+            for week, day in [DaysHelper.int_to_day_and_week(x) for x in range(1, total_days + 1)]:
+                for duty in data.get_set("I"):
+                    requests_on_day = data.count_if_exists("g_req_on", (None, duty, week, day))
+                    if requests_on_day > 1:
+                        conflicts_cnt += requests_on_day
+                        conflicts[(duty, week, day)].update(
+                            set(data.get_matching_keys("g_req_on", (None, duty, week, day))))
+                    total_requests += requests_on_day
+
+            conflict_prob = conflicts_cnt / total_requests
+            if conflict_prob > self.request_conflict_probability:
+                while conflict_prob > self.request_conflict_probability:
+                    if not conflicts_cnt:
+                        break
+                    conflict_key, conflict_set = random.choice(list(conflicts.items()))
+                    conflict_value = random.choice(list(conflict_set))
+                    conflict_phys, conflict_duty, conflict_week, conflict_day = conflict_value
+
+                    data.set("g_req_on", conflict_value, 0)
+                    conflicts_cnt -= 1
+                    conflicts[conflict_key].remove(conflict_value)
+                    total_requests -= 1
+
+                    # try to find alternative day for this request
+                    random_days = [DaysHelper.int_to_day_and_week(x) for x in range(1, total_days + 1)]
+                    random.shuffle(random_days)
+                    for week, day in random_days:
+                        if (week, day) == (conflict_week, conflict_day):
+                            # do not try to assign the same day again
+                            continue
+                        if not data.get("E_pos", (conflict_phys, conflict_duty, week, day)):
+                            # do not assign if the physician is not qualified for the duty on this date
+                            continue
+                        if data.count_if_exists("g_req_on", (conflict_phys, None, week, day)):
+                            # do not assign if the physician already has a preference for a duty on this date
+                            continue
+                        if data.get("g_req_off", (conflict_phys, week, day)):
+                            # do not assign if the physician already has a preference for no duty on this date
+                            continue
+                        if data.count_if_exists("g_req_on", (None, conflict_duty, week, day)):
+                            # do not assign if there is already a preference by someone else for this duty on this date
+                            continue
+                        if data.get("D_off", (conflict_phys, week, day)):
+                            # do not assign if physician is absent on this date
+                            continue
+
+                        data.set("g_req_on", (conflict_phys, conflict_duty, week, day), 1)
+                        total_requests += 1
+                        break
+
+                    if len(conflicts[conflict_key]) == 1:
+                        conflicts_cnt -= 1
+                        del conflicts[conflict_key]
+
+                    conflict_prob = conflicts_cnt / total_requests
+            elif conflict_prob < self.request_conflict_probability:
+                non_conflicts = list(set(data.get_values("g_req_on").keys()).difference(
+                    set().union(*conflicts.values())))
+                while conflict_prob < self.request_conflict_probability:
+                    if not non_conflicts:
+                        break
+                    my_non_conflict = random.choice(non_conflicts)
+                    non_conflict_phys, non_conflict_duty, non_conflict_week, non_conflict_day = my_non_conflict
+
+                    available_phys = [x[0] for x in data.get_matching_keys("E_pos", (None,
+                                                                                     non_conflict_duty,
+                                                                                     non_conflict_week,
+                                                                                     non_conflict_day))]
+
+                    if len(available_phys) == 1:
+                        # only one physician is qualified for this request, so we can never create a conflict here
+                        non_conflicts.remove(my_non_conflict)
+                        continue
+
+                    random.shuffle(available_phys)
+
+                    # try to find a physician who can request a conflicting assignment
+                    for candidate in available_phys:
+                        if candidate == non_conflict_phys:
+                            # do not assign the request to the same physician twice
+                            continue
+                        if data.get("g_req_off", (candidate, non_conflict_week, non_conflict_day)):
+                            # do not assign if the physician already has a no-duty preference on this date
+                            continue
+                        if data.count_if_exists("g_req_on", (candidate, None, non_conflict_week, non_conflict_day)):
+                            # do not assign if the physician already has a duty preference on this date
+                            continue
+                        if data.count_if_exists("D_off", (candidate, non_conflict_week, non_conflict_day)):
+                            # do not assign a physician who is absent
+                            continue
+
+                        data.set("g_req_on", (candidate, non_conflict_duty, non_conflict_week, non_conflict_day), 1)
+                        total_requests += 1
+                        non_conflicts.remove(my_non_conflict)
+                        conflicts_cnt += 2
+
+                        # try to delete another request to keep total number of requests constant
+                        if non_conflicts:
+                            drop_assignment = random.choice(non_conflicts)
+                            non_conflicts.remove(drop_assignment)
+                            data.set("g_req_on", drop_assignment, 0)
+                            total_requests -= 1
+
+                        break
+
+                    conflict_prob = conflicts_cnt / total_requests
 
     @staticmethod
     def clear_request_vars(data: util.data.DataSet) -> None:

@@ -11,7 +11,9 @@ import util.io
 class SatisfactionEvaluator:
     ModeInfo = namedtuple('ModeInfo', ['name', 'marker'])
 
-    solver_modes = {
+    solver_modes = ["unfair", "fair-linear", "fair-nonlinear"]
+
+    mode_settings = {
         "unfair": ModeInfo('C', 'diamond'),
         "fair-linear": ModeInfo('ESA', 'x'),
         "fair-nonlinear": ModeInfo("ESD", "plus")
@@ -434,7 +436,7 @@ class SatisfactionEvaluator:
                                                                last_req_cell.coordinate)
 
             overall_cell = sheet.cell(row=dir_row, column=overall_col)
-            overall_cell.value = self.results[directory]["total"]["g_req_on"]\
+            overall_cell.value = self.results[directory]["total"]["g_req_on"] \
                                  + self.results[directory]["total"]["g_req_off"]
 
             for mode_cnt, mode in enumerate(self.solver_modes):
@@ -554,8 +556,8 @@ class SatisfactionEvaluator:
             ref = openpyxl.chart.Reference(self.analysis_sheet, min_col=data_column, max_col=data_column,
                                            min_row=self.start_sat_table_row + 1,
                                            max_row=self.start_sat_table_row + len(self.physicians))
-            series = openpyxl.chart.Series(ref, title=self.solver_modes[mode].name)
-            series.marker.symbol = self.solver_modes[mode].marker
+            series = openpyxl.chart.Series(ref, title=self.mode_settings[mode].name)
+            series.marker.symbol = self.mode_settings[mode].marker
             series.graphicalProperties.line.noFill = True
             chart.append(series)
 
@@ -584,8 +586,8 @@ class SatisfactionEvaluator:
             ref = openpyxl.chart.Reference(self.analysis_sheet, min_col=data_column, max_col=data_column,
                                            min_row=self.start_sat_table_row + 1,
                                            max_row=self.start_sat_table_row + len(self.physicians))
-            series = openpyxl.chart.Series(ref, title=self.solver_modes[mode].name)
-            series.marker.symbol = self.solver_modes[mode].marker
+            series = openpyxl.chart.Series(ref, title=self.mode_settings[mode].name)
+            series.marker.symbol = self.mode_settings[mode].marker
             series.graphicalProperties.line.noFill = True
             chart.append(series)
 
@@ -637,7 +639,7 @@ class SatisfactionEvaluator:
             ref = openpyxl.chart.Reference(self.analysis_sheet, min_col=data_column, max_col=data_column,
                                            min_row=self.start_single_phys_table_row + 1,
                                            max_row=self.start_single_phys_table_row + len(self.results))
-            series = openpyxl.chart.Series(ref, title=self.solver_modes[mode].name)
+            series = openpyxl.chart.Series(ref, title=self.mode_settings[mode].name)
             chart.append(series)
 
         sheet.add_chart(chart, anchor=cell.offset(column=1, row=1).coordinate)

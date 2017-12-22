@@ -12,8 +12,12 @@ parser.add_argument("--on_probability", help="Likelihood in percent that a user 
                     type=float, default=0.07)
 parser.add_argument("--off_probability", help="Likelihood in percent that a user has a request for no duty on a date",
                     type=float, default=0.1)
+parser.add_argument("--conflict_probability", help="Likelihood in percent that a duty request is in conflict with at "
+                                                   "least one other request", type=float, default=None)
 args = parser.parse_args()
 
-request_generator = util.generator.RequestGenerator(args.on_probability, args.off_probability)
+request_generator = util.generator.RequestGenerator(args.on_probability,
+                                                    args.off_probability,
+                                                    args.conflict_probability)
 generator = util.generator.DirectoryGenerator(request_generator, args.filename)
 generator.run_in_directory(args.directory, args.output_directory)

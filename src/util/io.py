@@ -105,16 +105,16 @@ class CmplSolutionReader:
         solution = DataSet()
 
         with open(filename, "r") as file:
-            sepcount = 0
+            sep_count = 0
             for line in file:
                 if line.startswith("-" * 105):
-                    sepcount += 1
+                    sep_count += 1
                     continue
 
-                if sepcount < 3:
+                if sep_count < 3:
                     continue
 
-                if sepcount >= 4:
+                if sep_count >= 4:
                     break
 
                 varWithIndex = line.split()[0]
@@ -143,8 +143,6 @@ class HistoryWriter:
         sheet = self.wb.create_sheet(name)
 
         last_col = len(histories)
-        last_row = max(len(x) for x in histories)
-        all_series = []
 
         chart = openpyxl.chart.LineChart()
         chart.style = 12
@@ -165,7 +163,7 @@ class HistoryWriter:
         chart_col = last_col + 2
         sheet.add_chart(chart, anchor=sheet.cell(row=1, column=chart_col).coordinate)
 
-        first_step_col = chart_col + 7 # chart has a width of 7 columns
+        first_step_col = chart_col + 7  # chart has a width of 7 columns
 
         for column, particle in enumerate(step_histories):
             for row, value in enumerate(particle):
