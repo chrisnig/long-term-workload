@@ -52,9 +52,7 @@ class RequestGenerator(DataGenerator):
 
             conflict_prob = conflicts_cnt / total_requests
             if conflict_prob > self.request_conflict_probability:
-                while conflict_prob > self.request_conflict_probability:
-                    if not conflicts_cnt:
-                        break
+                while conflict_prob > self.request_conflict_probability and conflicts_cnt:
                     conflict_key, conflict_set = random.choice(list(conflicts.items()))
                     conflict_value = random.choice(list(conflict_set))
                     conflict_phys, conflict_duty, conflict_week, conflict_day = conflict_value
@@ -99,9 +97,7 @@ class RequestGenerator(DataGenerator):
             elif conflict_prob < self.request_conflict_probability:
                 non_conflicts = list(set(data.get_values("g_req_on").keys()).difference(
                     set().union(*conflicts.values())))
-                while conflict_prob < self.request_conflict_probability:
-                    if not non_conflicts:
-                        break
+                while conflict_prob < self.request_conflict_probability and non_conflicts:
                     my_non_conflict = random.choice(non_conflicts)
                     non_conflict_phys, non_conflict_duty, non_conflict_week, non_conflict_day = my_non_conflict
 
