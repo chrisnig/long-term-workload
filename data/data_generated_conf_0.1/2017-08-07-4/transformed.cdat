@@ -1,4 +1,5 @@
 %W_max < 4 >
+%A set < 0..18 >
 %J set < 1..85 >
 %I set < 1..6 >
 %W set < 1..4 >
@@ -3064,6 +3065,12 @@
 	43	1	4	4	1
 	29	5	3	7	1
 	5	5	2	5	1
+>
+%c_work[J, A] = 0 indices <
+0	0	0
+>
+%l_hat[J] = 0 indices <
+0	0
 >
 %c[J, V] = 0 indices <
 0	0	0

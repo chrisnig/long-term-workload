@@ -1,12 +1,14 @@
 %display nonZeros
 %display con none
 
-%data transformed.cdat : J set, I set, W set, D set, d_bar_duty[I, D], g_req_on[J, I, W, D], g_req_off[J, W, D], E_pos[J, I, W, D], D_off[J, W, D], W_max, s_hat[J], V set, c[J, V]
+%data transformed.cdat : J set, I set, W set, D set, d_bar_duty[I, D], g_req_on[J, I, W, D], g_req_off[J, W, D], E_pos[J, I, W, D], D_off[J, W, D], W_max, s_hat[J], V set, c[J, V], l_hat[J], A set, c_work[J, A]
 
 parameters:
-	alpha_1 := 10;
-	alpha_2 := 1;
-	gamma := 0.8;
+	alpha_1 := 100;
+	alpha_2 := 10;
+	alpha_3 := 1;
+	gamma_1 := 0.8;
+	gamma_2 := 0.8;
 	w_times_d := len(W) * len(D);
 
 variables:
@@ -16,11 +18,14 @@ variables:
 	delta_req_on[J, I, W, D] : binary;
 	delta_req_off[J, W, D] : binary;
 	s[J] : real[0..1];
+	l[J] : real[0..50];
 	y[J, V] : binary;
+	z[J, A] : binary;
 	
 objectives:
 	sum{i in I, w in W, d in D : alpha_1 * delta_out_duty[i, w, d]} +
-	sum{j in J, v in V : c[j, v] * y[j, v]} -> min;
+	sum{j in J, v in V : c[j, v] * y[j, v]} +
+	sum{j in J, a in A: c_work[j, a] * z[j, a]} -> min;
 
 constraints:
 	{
@@ -86,7 +91,7 @@ constraints:
 	
 	{
 		j in J:
-			CT11c: s[j] = sum{i in I, w in W, d in D : gamma * (1 / w_times_d) * g_req_on[j, i, w, d] - gamma * (1 / w_times_d) * delta_req_on[j, i, w, d]} + sum{w in W, d in D : gamma * (1 / w_times_d) * g_req_off[j, w, d] + gamma * (1 / w_times_d) * delta_req_off[j, w, d]} + (1 - gamma) * s_hat[j];
+			CT11c: s[j] = sum{i in I, w in W, d in D : gamma_1 * (1 / w_times_d) * g_req_on[j, i, w, d] - gamma_1 * (1 / w_times_d) * delta_req_on[j, i, w, d]} + sum{w in W, d in D : gamma_1 * (1 / w_times_d) * g_req_off[j, w, d] + gamma_1 * (1 / w_times_d) * delta_req_off[j, w, d]} + (1 - gamma_1) * s_hat[j];
 	}
 	
 	{
@@ -97,4 +102,19 @@ constraints:
 	{
 		j in J:
 			Linearize2: sum{i in I, w in W, d in D : delta_req_on[j, i, w, d]} + sum{w in W, d in D : delta_req_off[j, w, d]} = sum{v in V : v * y[j, v]};
+	}
+	
+	{
+		j in J:
+			l[j] = sum{i in I, w in W, d in D : gamma_2 * (1 / w_times_d) * x[j, i, w, d]} + ((1 - gamma_2) * l_hat[j]);
+	}
+
+	{
+		j in J:
+			sum{a in A : z[j, a]} = 1;
+	}
+
+	{
+		j in J:
+			sum{i in I, w in W, d in D : x[j, i, w, d]} = sum{a in A : a * z[j, a]};
 	}

@@ -4,6 +4,7 @@
 %D set < 1..7 >
 %D_work set < 1..5 >
 %W set < 1..5 >
+%A set < 0..18 >
 %J set < 1..85 >
 %s_hat[J] = 0 indices <
 	21	0.021258199999999994
@@ -3926,6 +3927,12 @@
 >
 %D_off[J, W, D] = 0 indices <
 0	0	0	0
+>
+%c_work[J, A] = 0 indices <
+0	0	0
+>
+%l_hat[J] = 0 indices <
+0	0
 >
 %c[J, V] = 0 indices <
 0	0	0
