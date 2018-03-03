@@ -5038,12 +5038,6 @@
 %l_hat[J] = 0 indices <
 0	0
 >
-%c_work[J, A] = 0 indices <
-0	0	0
->
-%l_hat[J] = 0 indices <
-0	0
->
 %c[J, V] = 0 indices <
 0	0	0
 >
