@@ -21,13 +21,17 @@ class RequestGenerator(DataGenerator):
         self.clear_request_vars(data)
         physicians = data.get_set("J")
         total_days = int(data.get_scalar("W_max")) * 7
-        for week, day in [DaysHelper.int_to_day_and_week(x) for x in range(1, total_days+1)]:
-            for phys in physicians:
+        for phys in physicians:
+            days_list = [DaysHelper.int_to_day_and_week(x) for x in range(1, total_days + 1)]
+            random.shuffle(days_list)
+            for week, day in days_list:
                 if not data.get("D_off", (phys, week, day)):
                     rand = random.random()
                     if rand < self.request_on_probability:
-                        if not data.get_matching_keys("g_req_on",
-                                                      (phys, None, *DaysHelper.get_previous_day(week, day))):
+                        if not (data.get_matching_keys("g_req_on",
+                                                       (phys, None, *DaysHelper.get_previous_day(week, day))) or
+                                data.get_matching_keys("g_req_on",
+                                                       (phys, None, *DaysHelper.get_next_day(week, day)))):
                             possible_duties = tuple(x[1] for x
                                                     in data.get_matching_keys("E_pos", (phys, None, week, day)))
                             if not possible_duties:

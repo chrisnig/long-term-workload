@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import Iterable
 import os
 import openpyxl
 import openpyxl.cell
@@ -11,20 +12,37 @@ import util.io
 class SatisfactionEvaluator:
     ModeInfo = namedtuple('ModeInfo', ['name', 'marker'])
 
-    solver_modes = ["unfair", "fair-linear", "fair-nonlinear"]
-
     mode_settings = {
-        "unfair": ModeInfo('C', 'diamond'),
-        "fair-linear": ModeInfo('ESA', 'x'),
-        "fair-nonlinear": ModeInfo("ESD", "plus")
+        "unequal": ModeInfo('unequal', 'diamond'),
+        "equal": ModeInfo('equal', 'x'),
+        "unequal-unfair": ModeInfo('unequal-unfair', 'diamond'),
+        "equal-unfair": ModeInfo('equal-unfair', 'x')
     }
 
-    def __init__(self, data_dir: str, solution_dir: str) -> None:
+    colors = {
+        "ASV": "ff5454",
+        "APS": "ffa7a7",
+        "ALV": "3ab7ff",
+        "APL": "a3ddff"
+    }
+
+    satisfaction_table_cols = [(1, "avg sigma", 1, "AVERAGE", None, colors["APS"]),
+                               (2, "var sigma", 1, "_xlfn.VAR.P", colors["ASV"], None),
+                               (3, "avg l", 2, "AVERAGE", None, None),
+                               (4, "var l", 2, "_xlfn.VAR.P", None, None),
+                               (5, "avg lambda", 3, "AVERAGE", None, colors["APL"]),
+                               (6, "var lambda", 3, "_xlfn.VAR.P", colors["ALV"], None)]
+
+    def __init__(self, data_dir: str, solution_dir: str, unfair: bool=False) -> None:
         self.data_dir = data_dir
         self.solution_dir = solution_dir
         self.solution_data = None
         self.physicians = None
         self.results = None
+
+        self.solver_modes = ["unequal", "equal"]
+        if unfair:
+            self.solver_modes = [x + "-unfair" for x in self.solver_modes]
 
         self.analysis_sheet = None
         self.charts_sheet = None
@@ -42,11 +60,12 @@ class SatisfactionEvaluator:
         # tables on analysis sheet
         self.start_sat_table_col = 1
         self.start_sat_table_row = 1
-        self.start_dir_table_col = self.start_sat_table_col + (len(self.solver_modes) * 2) + 2
+        self.start_dir_table_col = self.start_sat_table_col + 2 + (len(self.satisfaction_table_cols) *
+                                                                   len(self.solver_modes))
         self.start_dir_table_row = 1
-        self.start_req_table_col = self.start_dir_table_col + len(self.solver_modes) + 2
-        self.start_req_table_row = 1
-        self.start_single_phys_table_col = self.start_req_table_col + (len(self.solver_modes) * 4) + 4
+        # self.start_req_table_col = self.start_dir_table_col + len(self.solver_modes) + 2
+        # self.start_req_table_row = 1
+        # self.start_single_phys_table_col = self.start_req_table_col + (len(self.solver_modes) * 4) + 4
         self.start_single_phys_table_row = 1
 
     def _find_continuous_physicians(self) -> set:
@@ -86,38 +105,28 @@ class SatisfactionEvaluator:
                 }
 
             dir_result["modes"] = dict()
-
             for solver_mode in self.solver_modes:
                 mode_result = dict()
                 dir_result["modes"][solver_mode] = mode_result
                 solution = util.io.CmplSolutionReader.read(os.path.join(
                     self.solution_dir, directory, solver_mode + ".sol"))
+
                 for phys in physicians:
-                    req_on = dir_result[phys]["g_req_on"]
-                    req_off = dir_result[phys]["g_req_off"]
+                    req_on = parameters.count_if_exists("g_req_on", (phys, None, None, None))
+                    req_off = parameters.count_if_exists("g_req_off", (phys, None, None))
                     delta_req_on = solution.count_if_exists("delta_req_on", (phys, None, None, None))
                     delta_req_off = solution.count_if_exists("delta_req_off", (phys, None, None))
                     sat = (req_on - delta_req_on + req_off - delta_req_off) / days
-
-                    delta_eq = 0
-                    for week in range(1, int(parameters.get_scalar("W_max")) + 1):
-                        for duty in parameters.get_set("I"):
-                            if "delta_eq_plus" in solution:
-                                delta_eq += solution.get("delta_eq_plus", (phys, duty, week))
-                            if "delta_eq_minus" in solution:
-                                delta_eq -= solution.get("delta_eq_minus", (phys, duty, week))
+                    load = solution.get("l", (phys,))
+                    varlambda = solution.count_if_exists("x", (phys, None, None, None)) / days
 
                     mode_result[phys] = {
                         "satisfaction": sat,
-                        "load": delta_eq,
                         "delta_req_on": delta_req_on,
-                        "delta_req_off": delta_req_off
+                        "delta_req_off": delta_req_off,
+                        "load": load,
+                        "lambda": varlambda
                     }
-
-                mode_result["total"] = {
-                    "delta_req_on": solution.count_if_exists("delta_req_on", (None, None, None, None)),
-                    "delta_req_off": solution.count_if_exists("delta_req_off", (None, None, None, None))
-                }
 
         self.results = result
         return result
@@ -130,23 +139,28 @@ class SatisfactionEvaluator:
             sheet = wb.create_sheet(directory)
 
             self._write_directory_satisfaction_table(sheet, directory)
-            self._write_directory_request_table(sheet, directory)
-            self._write_directory_delta_request_table(sheet, directory)
+            # self._write_directory_request_table(sheet, directory)
+            # self._write_directory_delta_request_table(sheet, directory)
 
         analysis_sheet = wb.create_sheet("analysis", 0)
         self.analysis_sheet = analysis_sheet
+        analysis_sheet.freeze_panes = "A2"
         charts_sheet = wb.create_sheet("charts", 0)
         self.charts_sheet = charts_sheet
 
         self._write_satisfaction_table(analysis_sheet, self.start_sat_table_col, self.start_sat_table_row)
         self._write_satisfaction_directory_table(analysis_sheet, self.start_dir_table_col, self.start_dir_table_row)
-        self._write_request_table(analysis_sheet, self.start_req_table_col, self.start_req_table_row)
-        self._write_single_physician_table(analysis_sheet, self.start_single_phys_table_col,
-                                           self.start_single_phys_table_row)
-
-        self._write_satisfaction_average_per_phys_chart(charts_sheet, 1, 1)
-        self._write_satisfaction_variance_per_phys_chart(charts_sheet, 11, 1)
-        self._write_single_physician_chart(charts_sheet, self.single_phys_var_first_col, self.single_phys_var_first_row)
+        # self._write_request_table(analysis_sheet, self.start_req_table_col, self.start_req_table_row)
+        # self._write_single_physician_table(analysis_sheet, self.start_single_phys_table_col,
+        #                                    self.start_single_phys_table_row)
+        #
+        # self._write_satisfaction_average_per_phys_chart(charts_sheet, 1, 1)
+        # self._write_satisfaction_variance_per_phys_chart(charts_sheet, 11, 1)
+        # self._write_single_physician_chart(charts_sheet, self.single_phys_var_first_col, self.single_phys_var_first_row)
+        self._write_avg_sigma_chart(charts_sheet, 1, 1)
+        self._write_avg_lambda_chart(charts_sheet, 11, 1)
+        self._write_var_sigma_chart(charts_sheet, 1, 19)
+        self._write_var_lambda_chart(charts_sheet, 11, 19)
 
         wb.save(filename)
 
@@ -158,9 +172,13 @@ class SatisfactionEvaluator:
     def _setTopBorder(cell: openpyxl.cell.Cell):
         cell.border = openpyxl.styles.Border(top=openpyxl.styles.Side(border_style="thin", color="000000"))
 
+    @staticmethod
+    def _setCellBackground(cell: openpyxl.cell.Cell, color: str):
+        cell.fill = openpyxl.styles.PatternFill("solid", fgColor=color)
+
     def _write_satisfaction_table(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int) -> None:
         cell = sheet.cell(column=first_col, row=first_row)
-        cell.value = "VAR/AVG(s) by phys"
+        cell.value = "phys"
         self._setBoldFont(cell)
 
         self._write_physician_table(sheet, first_col, first_row + 1)
@@ -190,95 +208,93 @@ class SatisfactionEvaluator:
         cell.value = "diff %"
         self._setBoldFont(cell)
 
-        col_offset = 1
-        for solver_mode in self.solver_modes:
-            cell = sheet.cell(row=first_row, column=col_offset + first_col)
-            cell.value = solver_mode
-            self._setBoldFont(cell)
+        for mode_cnt, solver_mode in enumerate(self.solver_modes):
+            cols = self.satisfaction_table_cols
+            for colinfo in cols:
+                column = first_col + colinfo[0] + (mode_cnt * len(cols))
+                cell = sheet.cell(row=first_row, column=column)
+                cell.value = colinfo[1] + " " + solver_mode
+                self._setBoldFont(cell)
 
-            cell = sheet.cell(row=first_row, column=col_offset + len(self.solver_modes) + first_col)
-            cell.value = solver_mode
-            self._setBoldFont(cell)
+                for phys_cnt in range(len(self.physicians)):
+                    row = first_row + phys_cnt + 1
 
-            for phys_cnt in range(len(self.physicians)):
-                row = first_row + phys_cnt + 1
+                    cell = sheet.cell(row=row, column=column)
+                    dirsheet_row = self.sat_first_row + phys_cnt + 1
+                    dirsheet_col = self.sat_first_col + (3 * mode_cnt) + colinfo[2]
+                    dirsheet_cell = sheet.cell(row=dirsheet_row, column=dirsheet_col)
+                    cell.value = "={}({})".format(colinfo[3], ",".join(["'{}'!{}".format(sheet_name,
+                                                                                         dirsheet_cell.coordinate)
+                                                                        for sheet_name in self.results]))
 
-                cell = sheet.cell(row=row, column=first_col + col_offset)
-                dirsheet_row = self.sat_first_row + phys_cnt + 1
-                dirsheet_col = self.sat_first_col + col_offset
-                dirsheet_cell = sheet.cell(row=dirsheet_row, column=dirsheet_col)
-                cell.value = "=_xlfn.VAR.P({})".format(",".join(["'{}'!{}".format(sheet_name, dirsheet_cell.coordinate)
-                                                                 for sheet_name in self.results]))
-
-                cell = sheet.cell(row=row, column=first_col + len(self.solver_modes) + col_offset)
-                dirsheet_row = self.sat_first_row + phys_cnt + 1
-                dirsheet_col = self.sat_first_col + col_offset
-                dirsheet_cell = sheet.cell(row=dirsheet_row, column=dirsheet_col)
-                cell.value = "=AVERAGE({})".format(",".join(["'{}'!{}".format(sheet_name, dirsheet_cell.coordinate)
-                                                             for sheet_name in self.results]))
-
-            row = first_row + len(self.physicians) + 1
-            background_filled = openpyxl.styles.PatternFill("solid", fgColor="d8e4bc")
-            for repetition, styles, kpi_name in [(0, (background_filled, None), "APV"),
-                                                 (1, (None, background_filled), "APS")]:
-                column = first_col + col_offset + (repetition * len(self.solver_modes))
-                first_mode_column = first_col + 1 + (repetition * len(self.solver_modes))
-                cell = sheet.cell(row=row, column=column)
+                last_phys_row = first_row + len(self.physicians)
+                cell = sheet.cell(row=last_phys_row + 1, column=column)
                 cell.value = "=AVERAGE({}:{})".format(
-                    sheet.cell(row=first_row, column=column).coordinate,
-                    sheet.cell(row=row - 1, column=column).coordinate)
+                     sheet.cell(row=first_row + 1, column=column).coordinate,
+                     sheet.cell(row=last_phys_row, column=column).coordinate)
                 self._setBoldFont(cell)
                 self._setTopBorder(cell)
-                if styles[0]:
-                    cell.fill = styles[0]
+                if colinfo[4]:
+                    self._setCellBackground(cell, colinfo[4])
 
-                cell = sheet.cell(row=row + 1, column=column)
-                cell.value = "={}-{}".format(
-                    sheet.cell(row=row, column=column).coordinate,
-                    sheet.cell(row=row, column=first_mode_column).coordinate)
-                if styles[0]:
-                    cell.fill = styles[0]
+                if mode_cnt > 0:
+                    cell = sheet.cell(row=last_phys_row + 2, column=column)
+                    cell.value = "={}-{}".format(
+                        sheet.cell(row=last_phys_row + 1, column=column).coordinate,
+                        sheet.cell(row=last_phys_row + 1, column=first_col + colinfo[0]).coordinate
+                    )
+                    self._setBoldFont(cell)
+                    if colinfo[4]:
+                        self._setCellBackground(cell, colinfo[4])
 
-                cell = sheet.cell(row=row + 2, column=column)
-                cell.value = "={}/{}*100".format(
-                    sheet.cell(row=row + 1, column=column).coordinate,
-                    sheet.cell(row=row, column=first_mode_column).coordinate)
-                if styles[0]:
-                    cell.fill = styles[0]
+                    cell = sheet.cell(row=last_phys_row + 3, column=column)
+                    cell.value = "={}/{}*100".format(
+                        sheet.cell(row=last_phys_row + 2, column=column).coordinate,
+                        sheet.cell(row=last_phys_row + 1, column=first_col + colinfo[0]).coordinate
+                    )
+                    self._setBoldFont(cell)
+                if colinfo[4]:
+                    self._setCellBackground(cell, colinfo[4])
 
-                cell = sheet.cell(row=row + 3, column=column)
+                cell = sheet.cell(row=last_phys_row + 4, column=column)
                 cell.value = "=_xlfn.VAR.P({}:{})".format(
-                    sheet.cell(row=first_row, column=column).coordinate,
-                    sheet.cell(row=row - 1, column=column).coordinate)
+                     sheet.cell(row=first_row + 1, column=column).coordinate,
+                     sheet.cell(row=last_phys_row, column=column).coordinate)
                 self._setBoldFont(cell)
-                if styles[1]:
-                    cell.fill = styles[1]
+                if colinfo[5]:
+                    self._setCellBackground(cell, colinfo[5])
 
-                cell = sheet.cell(row=row + 4, column=column)
-                cell.value = "={}-{}".format(
-                    sheet.cell(row=row + 3, column=column).coordinate,
-                    sheet.cell(row=row + 3, column=first_mode_column).coordinate)
-                if styles[1]:
-                    cell.fill = styles[1]
+                if mode_cnt > 0:
+                    cell = sheet.cell(row=last_phys_row + 5, column=column)
+                    cell.value = "={}-{}".format(
+                        sheet.cell(row=last_phys_row + 4, column=column).coordinate,
+                        sheet.cell(row=last_phys_row + 4, column=first_col + colinfo[0]).coordinate
+                    )
+                    self._setBoldFont(cell)
+                    if colinfo[5]:
+                        self._setCellBackground(cell, colinfo[5])
 
-                cell = sheet.cell(row=row + 5, column=column)
-                cell.value = "={}/{}*100".format(
-                    sheet.cell(row=row + 4, column=column).coordinate,
-                    sheet.cell(row=row + 3, column=first_mode_column).coordinate)
-                if styles[1]:
-                    cell.fill = styles[1]
+                    cell = sheet.cell(row=last_phys_row + 6, column=column)
+                    cell.value = "={}/{}*100".format(
+                        sheet.cell(row=last_phys_row + 5, column=column).coordinate,
+                        sheet.cell(row=last_phys_row + 4, column=first_col + colinfo[0]).coordinate
+                    )
+                    self._setBoldFont(cell)
+                    if colinfo[5]:
+                        self._setCellBackground(cell, colinfo[5])
 
-                if (len(self.solver_modes) // 2) < col_offset <= (len(self.solver_modes) // 2) + 1:
-                    cell = sheet.cell(row=row + 7, column=column)
-                    cell.value = kpi_name
-                    cell.fill = background_filled
-
-            col_offset += 1
+        row = first_row + len(self.physicians) + 8
+        col = first_col
+        for color in self.colors:
+            cell = sheet.cell(row=row, column=col)
+            cell.value = color
+            self._setCellBackground(cell, self.colors[color])
+            col += 1
 
     def _write_satisfaction_directory_table(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int) \
             -> None:
         cell = sheet.cell(column=first_col, row=first_row)
-        cell.value = "VAR(s) by plan"
+        cell.value = "plan"
         self._setBoldFont(cell)
 
         row = first_row + 1
@@ -350,22 +366,34 @@ class SatisfactionEvaluator:
         first_col = self.sat_first_col
         first_row = self.sat_first_row
         cell = sheet.cell(column=first_col, row=first_row)
-        cell.value = "s"
+        cell.value = "phys"
         self._setBoldFont(cell)
 
         self._write_physician_table(sheet, first_col, first_row + 1)
 
-        col_offset = 1
-        for solver_mode in self.solver_modes:
-            cell = sheet.cell(row=1, column=col_offset + first_col)
-            cell.value = solver_mode
+        for mode_cnt, solver_mode in enumerate(self.solver_modes):
+            first_mode_col = first_col + 1 + (3 * mode_cnt)
+            cell = sheet.cell(column=first_mode_col, row=first_row)
+            cell.value = "sigma " + solver_mode
             self._setBoldFont(cell)
+
+            cell = sheet.cell(column=first_mode_col + 1, row=first_row)
+            cell.value = "l " + solver_mode
+            self._setBoldFont(cell)
+
+            cell = sheet.cell(column=first_mode_col + 2, row=first_row)
+            cell.value = "lambda " + solver_mode
+            self._setBoldFont(cell)
+
             row = first_row + 1
             for phys in sorted(self.physicians):
-                sheet.cell(row=row, column=col_offset + first_col).value = \
+                sheet.cell(row=row, column=first_mode_col).value = \
                     self.results[directory]["modes"][solver_mode][phys]["satisfaction"]
+                sheet.cell(row=row, column=first_mode_col + 1).value = \
+                    self.results[directory]["modes"][solver_mode][phys]["load"]
+                sheet.cell(row=row, column=first_mode_col + 2).value = \
+                    self.results[directory]["modes"][solver_mode][phys]["lambda"]
                 row += 1
-            col_offset += 1
 
     def _write_directory_request_table(self, sheet: openpyxl.worksheet.Worksheet, directory: str) -> None:
         first_col = self.req_first_col
@@ -532,11 +560,51 @@ class SatisfactionEvaluator:
             self._setBoldFont(total_vio_overall_cell)
             self._setTopBorder(total_vio_overall_cell)
 
-    def _write_satisfaction_average_per_phys_chart(self, sheet: openpyxl.worksheet.Worksheet, first_col: int,
-                                                   first_row: int) -> None:
+    def _write_avg_sigma_chart(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int) -> None:
+        self._add_physician_chart(
+            sheet,
+            first_col,
+            first_row,
+            "average sigma",
+            "average sigma",
+            1
+        )
+
+    def _write_avg_lambda_chart(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int) -> None:
+        self._add_physician_chart(
+            sheet,
+            first_col,
+            first_row,
+            "average lambda",
+            "average lambda",
+            5
+        )
+
+    def _write_var_sigma_chart(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int) -> None:
+        self._add_physician_chart(
+            sheet,
+            first_col,
+            first_row,
+            "variance sigma",
+            "variance sigma",
+            2
+        )
+
+    def _write_var_lambda_chart(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int) -> None:
+        self._add_physician_chart(
+            sheet,
+            first_col,
+            first_row,
+            "variance lambda",
+            "variance lambda",
+            6
+        )
+
+    def _add_physician_chart(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int, title: str,
+                             y_axis: str, data_col_offset: int) -> None:
         anchor = sheet.cell(column=first_col, row=first_row)
         cell = sheet.cell(column=first_col, row=first_row)
-        cell.value = "average satisfaction per physician"
+        cell.value = title
 
         chart = openpyxl.chart.LineChart()
         chart.style = 1
@@ -544,7 +612,7 @@ class SatisfactionEvaluator:
         chart.width = 15
         chart.legend.position = "b"
         chart.x_axis.title = "physician"
-        chart.y_axis.title = "average satisfaction"
+        chart.y_axis.title = y_axis
 
         xref = openpyxl.chart.Reference(self.analysis_sheet, min_col=self.start_sat_table_col,
                                         max_col=self.start_sat_table_col,
@@ -552,46 +620,17 @@ class SatisfactionEvaluator:
                                         max_row=self.start_sat_table_row + len(self.physicians))
         chart.set_categories(xref)
         for mode_cnt, mode in enumerate(self.solver_modes):
-            data_column = self.start_sat_table_col + 1 + len(self.solver_modes) + mode_cnt
+            data_column = self.start_sat_table_col + data_col_offset + (len(self.satisfaction_table_cols) * mode_cnt)
             ref = openpyxl.chart.Reference(self.analysis_sheet, min_col=data_column, max_col=data_column,
                                            min_row=self.start_sat_table_row + 1,
                                            max_row=self.start_sat_table_row + len(self.physicians))
-            series = openpyxl.chart.Series(ref, title=self.mode_settings[mode].name)
-            series.marker.symbol = self.mode_settings[mode].marker
+            mode_info = self.mode_settings[mode]
+            series = openpyxl.chart.Series(ref, title=mode_info.name)
+            series.marker.symbol = mode_info.marker
             series.graphicalProperties.line.noFill = True
             chart.append(series)
 
         sheet.add_chart(chart, anchor=anchor.offset(column=1).coordinate)
-
-    def _write_satisfaction_variance_per_phys_chart(self, sheet: openpyxl.worksheet.Worksheet, first_col: int,
-                                                    first_row: int) -> None:
-        cell = sheet.cell(column=first_col, row=first_row)
-        cell.value = "variance per physician"
-
-        chart = openpyxl.chart.LineChart()
-        chart.style = 1
-        chart.height = 9
-        chart.width = 15
-        chart.legend.position = "b"
-        chart.x_axis.title = "physician"
-        chart.y_axis.title = "variance"
-
-        xref = openpyxl.chart.Reference(self.analysis_sheet, min_col=self.start_sat_table_col,
-                                        max_col=self.start_sat_table_col,
-                                        min_row=self.start_sat_table_row + 1,
-                                        max_row=self.start_sat_table_row + len(self.physicians))
-        chart.set_categories(xref)
-        for mode_cnt, mode in enumerate(self.solver_modes):
-            data_column = self.start_sat_table_col + 1 + mode_cnt
-            ref = openpyxl.chart.Reference(self.analysis_sheet, min_col=data_column, max_col=data_column,
-                                           min_row=self.start_sat_table_row + 1,
-                                           max_row=self.start_sat_table_row + len(self.physicians))
-            series = openpyxl.chart.Series(ref, title=self.mode_settings[mode].name)
-            series.marker.symbol = self.mode_settings[mode].marker
-            series.graphicalProperties.line.noFill = True
-            chart.append(series)
-
-        sheet.add_chart(chart, anchor=cell.offset(column=1).coordinate)
 
     def _write_single_physician_table(self, sheet: openpyxl.worksheet.Worksheet, first_col: int, first_row: int) \
             -> None:

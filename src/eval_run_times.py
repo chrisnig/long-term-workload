@@ -8,7 +8,7 @@ args = parser.parse_args()
 
 main_dir = args.directory
 
-modes = ["unfair", "fair-linear", "fair-nonlinear"]
+modes = ["unequal", "equal"]
 results = {mode: {"min": sys.maxsize, "max": 0} for mode in modes}
 
 for directory in filter(lambda x: os.path.isdir(os.path.join(main_dir, x)),

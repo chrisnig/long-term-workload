@@ -1,0 +1,88 @@
+CMPL model generation - running
+
+CMPL version: 1.11.0
+Authors: Thomas Schleiff, Mike Steglich
+Distributed under the GPLv3 
+
+create model instance ...
+write model instance ...
+CMPL model generation - finished
+
+Solver - running
+
+
+Welcome to IBM(R) ILOG(R) CPLEX(R) Interactive Optimizer 12.7.1.0
+  with Simplex, Mixed Integer & Barrier Optimizers
+5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 5655-Y21
+Copyright IBM Corp. 1988, 2017.  All Rights Reserved.
+
+Type 'help' for a list of available commands.
+Type 'help' followed by a command name for more
+information on commands.
+
+CPLEX> Specified objective sense: MINIMIZE
+Selected objective  name:  line[1]
+Selected RHS        name:  RHS
+Selected bound      name:  BOUND
+Problem '/tmp/cmpl.T10513.mps' read.
+Read time = 0.05 sec. (9.67 ticks)
+CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
+Tried aggregator 3 times.
+MIP Presolve eliminated 19227 rows and 30947 columns.
+MIP Presolve modified 511 coefficients.
+Aggregator did 679 substitutions.
+Reduced MIP has 2704 rows, 4667 columns, and 15175 nonzeros.
+Reduced MIP has 4499 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (51.07 ticks)
+Probing fixed 14 vars, tightened 0 bounds.
+Probing time = 0.02 sec. (7.87 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 3 rows and 14 columns.
+MIP Presolve modified 83 coefficients.
+Aggregator did 2 substitutions.
+Reduced MIP has 2699 rows, 4651 columns, and 15137 nonzeros.
+Reduced MIP has 4651 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (13.91 ticks)
+Probing time = 0.01 sec. (3.01 ticks)
+Clique table members: 9485.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.02 sec. (14.96 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0     3072.8071     5                   3072.8071      949         
+*     0+    0                         3112.8121     3072.8071             1.29%
+*     0+    0                         3074.2357     3072.8071             0.05%
+*     0     0      integral     0     3073.5399      Cuts: 13      963    0.00%
+      0     0        cutoff           3073.5399     3073.5399      963    0.00%
+Elapsed time = 0.33 sec. (172.99 ticks, tree = 0.01 MB, solutions = 3)
+
+Clique cuts applied:  4
+Cover cuts applied:  6
+Gomory fractional cuts applied:  3
+
+Root node processing (before b&c):
+  Real time             =    0.33 sec. (174.66 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    0.33 sec. (174.66 ticks)
+
+Solution pool: 3 solutions saved.
+
+MIP - Integer optimal solution:  Objective =  3.0735398530e+03
+Solution time =    0.33 sec.  Iterations = 963  Nodes = 0
+Deterministic time = 174.77 ticks  (531.79 ticks/sec)
+
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T10513.gsol'.
+CPLEX> 
+CMPL: Time used for model generation: 1 seconds
+CMPL: Time used for solving the model: 2 seconds
+
+
+Solution written to ASCII file: ../results/output_generated_conf_0.7/2017-09-04-4/equal.sol
+
+Solver - finished

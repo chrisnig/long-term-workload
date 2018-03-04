@@ -1,0 +1,89 @@
+CMPL model generation - running
+
+CMPL version: 1.11.0
+Authors: Thomas Schleiff, Mike Steglich
+Distributed under the GPLv3 
+
+create model instance ...
+write model instance ...
+CMPL model generation - finished
+
+Solver - running
+
+
+Welcome to IBM(R) ILOG(R) CPLEX(R) Interactive Optimizer 12.7.1.0
+  with Simplex, Mixed Integer & Barrier Optimizers
+5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 5655-Y21
+Copyright IBM Corp. 1988, 2017.  All Rights Reserved.
+
+Type 'help' for a list of available commands.
+Type 'help' followed by a command name for more
+information on commands.
+
+CPLEX> Specified objective sense: MINIMIZE
+Selected objective  name:  line[1]
+Selected RHS        name:  RHS
+Selected bound      name:  BOUND
+Problem '/tmp/cmpl.T10006.mps' read.
+Read time = 0.07 sec. (10.96 ticks)
+CPLEX> CPXPARAM_Read_APIEncoding                        "UTF-8"
+Tried aggregator 3 times.
+MIP Presolve eliminated 24146 rows and 37768 columns.
+MIP Presolve modified 425 coefficients.
+Aggregator did 721 substitutions.
+Reduced MIP has 3140 rows, 4051 columns, and 11997 nonzeros.
+Reduced MIP has 3841 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.07 sec. (51.53 ticks)
+Found incumbent of value 6555.028568 after 0.11 sec. (73.88 ticks)
+Probing fixed 10 vars, tightened 0 bounds.
+Probing time = 0.02 sec. (5.18 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 0 rows and 10 columns.
+MIP Presolve modified 48 coefficients.
+Reduced MIP has 3140 rows, 4041 columns, and 11977 nonzeros.
+Reduced MIP has 4041 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (10.23 ticks)
+Probing time = 0.01 sec. (2.84 ticks)
+Clique table members: 7329.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.01 sec. (5.63 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                         6555.0286     -273.4286           104.17%
+      0     0     1021.0857    14     6555.0286     1021.0857      130   84.42%
+*     0+    0                         1166.0000     1021.0857            12.43%
+*     0+    0                         1024.2857     1021.0857             0.31%
+*     0     0      integral     0     1024.0571      Cuts: 18      135    0.00%
+      0     0        cutoff           1024.0571     1024.0571      135    0.00%
+Elapsed time = 0.18 sec. (121.49 ticks, tree = 0.01 MB, solutions = 4)
+
+Clique cuts applied:  3
+Cover cuts applied:  10
+Gomory fractional cuts applied:  5
+
+Root node processing (before b&c):
+  Real time             =    0.18 sec. (123.60 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    0.18 sec. (123.60 ticks)
+
+Solution pool: 4 solutions saved.
+
+MIP - Integer optimal solution:  Objective =  1.0240571390e+03
+Solution time =    0.18 sec.  Iterations = 135  Nodes = 0
+Deterministic time = 123.73 ticks  (669.54 ticks/sec)
+
+CPLEX> Incumbent solution written to file '/tmp/cmpl.T10006.gsol'.
+CPLEX> 
+CMPL: Time used for model generation: 1 seconds
+CMPL: Time used for solving the model: 1 seconds
+
+
+Solution written to ASCII file: ../results/output_generated_conf_0.3/2015-11-02-5/unequal.sol
+
+Solver - finished
