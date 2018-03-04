@@ -1,7 +1,7 @@
-Long-term fairness for preference fulfillment of hospital physicians
-====================================================================
+Long-term workload equality for hospital physicians on duty rosters
+===================================================================
 
-This is an implementation to assist with experiments presented in the paper "Hospital physicians can't get no satisfaction - An indicator for fairness in preference fulfillment on duty schedules".
+This is an implementation to assist with experiments presented in the paper "Long-term workload equality on duty schedules for physicians in hospitals".
 
 Directory structure
 -------------------
@@ -10,8 +10,17 @@ This repository is structured as follows.
 
 * ``data`` contains the data used for the experiments in the paper. For privacy reasons, we do not provide real-life data but only generated data.
     * ``data/data_generated_0.8`` contains data generated based on the real-life data without restricting the conflict rate and a preference rate of 80%. We include this data because it is the base data we used to generate our data with a target conflict rate.
-    * ``data/data_generated_conf_{x}`` contain data with a conflict rate of *x*. This is the data used for our experiments in the paper.
-* ``results`` contains the results obtained by experiments in the paper. ``results/output_generated`` and ``results/results_generated.xlsx`` contain results for the generated data. For privacy reasons, we do not provide detailed results for real-life data, instead we just provide aggregated real-life results in ``results/results_real.xlsx``.
+    * ``data/data_generated_conf_{x}`` contains data with a conflict rate of *x*. This is the data used for our experiments in the paper.
+    * ``data/data_generated_rate_{x}`` contains data with a preference probability of *x*. This is the data used for our experiments in the paper.
+    * ``data/ltw-[un]equal.cmpl`` contain the models for the F-ESL [F-CL] strategies.
+    * ``data/ltw-[un]equal-unfair.cmpl`` contain the models for the U-ESL [U-CL] strategies.
+* ``results`` contains the results obtained by experiments in the paper.
+    * ``results/output_generated_conf_{x}`` and ``results/results_generated_conf_{x}.xlsx`` contain the results for the experiments with different conflict rates.
+    * ``results/output_generated_rate_{x}`` and ``results/results_generated_rate_{x}.xlsx`` contain the results for the experiments with different preference probabilities.
+    * ``results/output_unfair_conf_0`` and ``results/results_unfair_conf_0.xlsx`` contain the results for the experiment with the U-CL and U-ESL strategies for the data with a 0% conflict rate.
+    * ``results/conf_progression.xlsx`` contains the data for the change in performance indicators with increasing conflict rate.
+    * ``results/rate_progression.xlsx`` contains the data for the change in performance indicators with increasing preference probability.
+    * ``results/pref-prob-rate.xlsx`` contains the data for the change in preference rate with increasing preference probability.
 * ``src`` contains all the scripts required to run the experiments described in the paper. See below for a step-by-step description how to run them.
 
 Requirements
@@ -33,15 +42,15 @@ To reproduce our experiments, we provide a bash script that performs all require
 
 Before invoking the script, you should clear all of our generated data and results as follows.
 * Delete everything in the ``results`` directory, but not the directory itself.
-* Delete all directories named ``data/data_generated_conf_*``, but make sure not to delete ``data/data_generated_0.8`` as this directory will be required for data generation.
+* Delete all directories named ``data/data_generated_conf_*`` and ``data/data_generated_rate_*``, but make sure not to delete ``data/data_generated_0.8`` as this directory will be required for data generation.
 
-After you have performed the deletion, you can change to the ``src`` directory and invoke ``run_all_conf.sh``. After the script has finished, you can find all the results in the ``results`` directory.
+After you have performed the deletion, you can change to the ``src`` directory and invoke ``run_all_conf.sh`` (runs experiments on different conflict rates) and ``run_all_rate.sh`` (runs experiments on different preference probabilities). After the script has finished, you can find all the results in the ``results`` directory.
 
-Alternatively, you can also go through all steps manually. The process is described below. We show the process for a target conflict rate of 80%. If you want to compare different conflict probabilities, the process needs to be repeated.
+Alternatively, you can also go through all steps manually. The process is described below. We show the process for a target conflict rate of 80%. If you want to compare different conflict probabilities, the process needs to be repeated. Similarly, if you want to vary the preference probability, this process needs to be repeated with the respective parameters.
 
 1. **Generate data for physicians.** This step is optional as we supply generated data in the ``data`` directory which is the data we ran our experiments on. Skip this step if you want to use our generated data.
 
-    Our software assumes the data in the form of CDAT files. These files are read by the CMPL software. We expect each CDAT file to have the same file name. The files should each be stored in a different subdirectory. In our case, we name the subdirectories with the starting date of the respective roster and the number of weeks the roster should span. The following parameters need to be supplied to the script to generate data: 
+    Our software accepts the data in the form of CDAT files. These files are read by the CMPL software. We expect each CDAT file to have the same file name. The files should each be stored in a different subdirectory. In our case, we name the subdirectories with the starting date of the respective roster and the number of weeks the roster should span. The following parameters need to be supplied to the script to generate data: 
     * input directory which contains subdirectories with existing data that should be modified. You can use our supplied data for this purpose.
     * output directory where subdirectories for the generated data will be created
     * number of physicians
@@ -67,15 +76,16 @@ Alternatively, you can also go through all steps manually. The process is descri
 
 2. **Copy the model to your data directory.** If you are using our supplied data, skip this step as the models are already in the data directory.
 
-    Our solver run script assumes the models for the different strategies to be named ``ltf-unfair.cmpl`` (C strategy), ``ltf-fair-linear.cmpl`` (ESA strategy), and ``ltf-fair-nonlinear.cmpl`` (ESD strategy). You can copy these files from our supplied data directory and put them directly in your data directory (not in one of the subdirectories). For an example, see the supplied ``data/data_generated_conf_0.8`` directory.
+    Our solver run script assumes the models for the different strategies to be named ``ltw-unequal.cmpl`` (F-CL strategy), ``ltw-equal.cmpl`` (F-ESL strategy), ``ltw-unequal-unfair`` (U-CL strategy) and ``ltw-equal-unfair.cmpl`` (U-ESL strategy). You can copy these files from our supplied data directory and put them directly in your data directory (not in one of the subdirectories).
 
 3. **Run the solver on the data.**
 
     We provide a script which automatically invokes the solver for each instance and also takes care of updating the historic satisfaction  as described in the paper. Note that the execution of this command may take a while. It doesn't output any messages, so don't worry if it looks like nothing is happening. Check your computer's CPU usage and task list to see whether it is still running.
 
-    Our solver run script takes two parameters:
+    Our solver run script takes two to three parameters:
     * input directory which contains the model files and subdirectories with the data. Note that there should be a file called ``transformed.cdat`` in each subdirectory containing the data for the instance.
     * output directory where the solution will be written
+    * (optional) --unfair solve unfair models. If this is set, the solver will solve the U- models. Otherwise, it will solve the F- models.
 
     A sample invocation of the command looks as follows: ``python src/solve_all.py data/my_generated_data results/my_new_results``
 
@@ -83,10 +93,11 @@ Alternatively, you can also go through all steps manually. The process is descri
 
     The solver has solved all the models, so now we can aggregate the data. The ``eval_solver_runs.py`` script creates an Excel file that provides an overview of the data and also creates the nifty graphs shown in the paper.
 
-    The evaluation script takes three parameters:
+    The evaluation script takes three to four parameters:
     * the solver input directory containing the data
     * the solver output directory containing the solutions
     * the file name of the results file that should be written
+    * (optional) --unfair evaluate unfair models. If this is set, the evaluation will be created for the U- models. Otherwise, it will evaluate the F- models.
 
     A sample invocation of the command looks as follows: ``python src/eval_solver_runs.py data/my_generated_data results/my_new_results results/my_new_results/my_evaluation_results.xlsx``
  
